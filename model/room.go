@@ -6,11 +6,11 @@ import (
 )
 
 type Rooms struct {
-	List []Room
+	List []*Room
 }
 
 func (rms *Rooms) AddRoom(room *Room) {
-	rms.List = append(rms.List, *room)
+	rms.List = append(rms.List, room)
 }
 
 func (rms *Rooms) searchByID(id int) (*Room, error) {
@@ -19,10 +19,34 @@ func (rms *Rooms) searchByID(id int) (*Room, error) {
 	}
 	for i := range rms.List {
 		if rms.List[i].ID == id {
-			return &rms.List[id], nil
+			return rms.List[i], nil
 		}
 	}
 	return nil, fmt.Errorf("room with ID %d not found", id)
+}
+
+func (rms *Rooms) SearchStart() (*Room, error) {
+	if len(rms.List) < 1 {
+		return nil, errors.New("error: list is empty")
+	}
+	for i := range rms.List {
+		if rms.List[i].Flag == "##start" {
+			return rms.List[i], nil
+		}
+	}
+	return nil, fmt.Errorf("start room not found")
+}
+
+func (rms *Rooms) SearchEnd() (*Room, error) {
+	if len(rms.List) < 1 {
+		return nil, errors.New("error: list is empty")
+	}
+	for i := range rms.List {
+		if rms.List[i].Flag == "##end" {
+			return rms.List[i], nil
+		}
+	}
+	return nil, fmt.Errorf("end room not found")
 }
 
 func (rms *Rooms) AddLink(fromID, toID int) error {
@@ -34,7 +58,8 @@ func (rms *Rooms) AddLink(fromID, toID int) error {
 	if err != nil {
 		return err
 	}
-	from.Links = append(from.Links, *to)
+	from.Links = append(from.Links, to)
+	to.Links = append(to.Links, from)
 	return nil
 }
 
@@ -48,7 +73,7 @@ func (rms *Rooms) Printer() {
 func (rms *Rooms) Search(id int) (*Room, error) {
 	for i := range rms.List {
 		if rms.List[i].ID == id {
-			return &rms.List[i], nil
+			return rms.List[i], nil
 		}
 	}
 	return nil, errors.New("error: room not found")
@@ -59,7 +84,7 @@ type Room struct {
 	X     int
 	Y     int
 	Flag  string // ##start, ##end, ##0
-	Links []Room
+	Links []*Room
 }
 
 func (r *Room) flagCheck() (string, error) {

@@ -8,7 +8,7 @@ import (
 )
 
 func FileReader(name string) []string {
-	file, err := os.Open(name + ".txt")
+	file, err := os.Open(name)
 	if err != nil {
 		log.Fatalf("ERROR: could not open file: %v", err)
 	}
