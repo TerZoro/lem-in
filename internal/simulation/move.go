@@ -1,8 +1,8 @@
-package main
+package simulation
 
 import (
 	"fmt"
-	"lemin/model"
+	"lemin/internal/model"
 )
 
 func SimulateAnts(paths *model.Paths, numAnts int, rooms *model.Rooms, lines []string) {
@@ -19,7 +19,7 @@ func SimulateAnts(paths *model.Paths, numAnts int, rooms *model.Rooms, lines []s
 		}
 	}
 
-	// Distribute ants across paths optimally
+	// Distribute ants
 	distributeAnts(ants, paths)
 
 	// Track which rooms are occupied (except start and end)
@@ -48,9 +48,14 @@ func SimulateAnts(paths *model.Paths, numAnts int, rooms *model.Rooms, lines []s
 		turn++
 		moves := []string{}
 
-		// Move existing ants first (those already active)
-		for _, ant := range ants {
-			if ant.Finished || !ant.Active {
+		// Move all ants in a single loop
+		for i, ant := range ants {
+			if ant.Finished {
+				continue
+			}
+
+			// Skip if ant hasn't started yet and it's not their turn
+			if !ant.Active && turn < antStartTurn[i] {
 				continue
 			}
 
@@ -69,39 +74,6 @@ func SimulateAnts(paths *model.Paths, numAnts int, rooms *model.Rooms, lines []s
 					}
 
 					// Move to next room
-					ant.StepIndex++
-					ant.RoomID = nextRoom.ID
-					if nextRoom.Flag != "##start" && nextRoom.Flag != "##end" {
-						occupied[nextRoom.ID] = true
-					}
-					moves = append(moves, fmt.Sprintf("L%d-%d", ant.ID, nextRoom.ID))
-
-					// Check if ant reached the end
-					if nextRoom.Flag == "##end" {
-						ant.Finished = true
-						finishedAnts++
-						// Free the room when ant reaches end
-						if currentRoom.Flag != "##start" && currentRoom.Flag != "##end" {
-							occupied[currentRoom.ID] = false
-						}
-					}
-				}
-			}
-		}
-
-		// Then try to start new ants (only if it's their turn to start)
-		for i, ant := range ants {
-			if ant.Finished || ant.Active || turn < antStartTurn[i] {
-				continue
-			}
-
-			path := paths.AllPaths[ant.PathIndex]
-
-			// Try to move from start to first room
-			if ant.StepIndex+1 < len(path.Rooms) {
-				nextRoom := path.Rooms[ant.StepIndex+1]
-				// Check if next room is occupied (start and end rooms can have multiple ants)
-				if !occupied[nextRoom.ID] || nextRoom.Flag == "##start" || nextRoom.Flag == "##end" {
 					ant.Active = true
 					ant.StepIndex++
 					ant.RoomID = nextRoom.ID
@@ -129,40 +101,6 @@ func SimulateAnts(paths *model.Paths, numAnts int, rooms *model.Rooms, lines []s
 			}
 			fmt.Println()
 		}
-	}
-}
-
-func distributeAnts(ants []*model.Ant, paths *model.Paths) {
-	// Better distribution: consider path lengths and distribute optimally
-	if len(paths.AllPaths) == 0 {
-		return
-	}
-
-	// Simple strategy: use shortest paths first, distribute evenly
-	// Sort paths by length (already done in BFS)
-	if len(paths.AllPaths) >= 2 {
-		// Use the two shortest paths
-		ants[0].PathIndex = 0 // First ant uses shortest path
-		if len(ants) > 1 {
-			ants[1].PathIndex = 1 // Second ant uses second shortest path
-		}
-		if len(ants) > 2 {
-			ants[2].PathIndex = 0 // Third ant uses shortest path (delayed)
-		}
-		// Continue pattern for more ants
-		for i := 3; i < len(ants); i++ {
-			ants[i].PathIndex = i % len(paths.AllPaths)
-		}
-	} else {
-		// Only one path available
-		for _, ant := range ants {
-			ant.PathIndex = 0
-		}
-	}
-
-	// Set initial room for all ants
-	for _, ant := range ants {
-		ant.RoomID = paths.AllPaths[ant.PathIndex].Rooms[0].ID // Start room
 	}
 }
 

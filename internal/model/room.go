@@ -1,8 +1,8 @@
 package model
 
 import (
-	"errors"
 	"fmt"
+	errhandle "lemin/pkg/errors"
 )
 
 type Rooms struct {
@@ -15,38 +15,38 @@ func (rms *Rooms) AddRoom(room *Room) {
 
 func (rms *Rooms) searchByID(id int) (*Room, error) {
 	if len(rms.List) < 1 {
-		return nil, errors.New("error: list is empty")
+		return nil, errhandle.FormatError(errhandle.ErrEmptyList)
 	}
 	for i := range rms.List {
 		if rms.List[i].ID == id {
 			return rms.List[i], nil
 		}
 	}
-	return nil, fmt.Errorf("room with ID %d not found", id)
+	return nil, errhandle.FormatError(errhandle.ErrRoomNotFound)
 }
 
 func (rms *Rooms) SearchStart() (*Room, error) {
 	if len(rms.List) < 1 {
-		return nil, errors.New("error: list is empty")
+		return nil, errhandle.FormatError(errhandle.ErrEmptyList)
 	}
 	for i := range rms.List {
 		if rms.List[i].Flag == "##start" {
 			return rms.List[i], nil
 		}
 	}
-	return nil, fmt.Errorf("start room not found")
+	return nil, errhandle.FormatError(errhandle.ErrStartRoom)
 }
 
 func (rms *Rooms) SearchEnd() (*Room, error) {
 	if len(rms.List) < 1 {
-		return nil, errors.New("error: list is empty")
+		return nil, errhandle.FormatError(errhandle.ErrEmptyList)
 	}
 	for i := range rms.List {
 		if rms.List[i].Flag == "##end" {
 			return rms.List[i], nil
 		}
 	}
-	return nil, fmt.Errorf("end room not found")
+	return nil, errhandle.FormatError(errhandle.ErrEndRoom)
 }
 
 func (rms *Rooms) AddLink(fromID, toID int) error {
@@ -76,7 +76,45 @@ func (rms *Rooms) Search(id int) (*Room, error) {
 			return rms.List[i], nil
 		}
 	}
-	return nil, errors.New("error: room not found")
+	return nil, errhandle.FormatError(errhandle.ErrRoomNotFound)
+}
+
+func (r *Rooms) GetStartRoom() (*Room, error) {
+	if len(r.List) == 0 {
+		return nil, errhandle.FormatError(errhandle.ErrEmptyList)
+	}
+	for i := range r.List {
+		if r.List[i].Flag == "##start" {
+			return r.List[i], nil
+		}
+	}
+	return nil, errhandle.FormatError(errhandle.ErrStartRoom)
+}
+
+func (r *Rooms) GetEndRoom() (*Room, error) {
+	if len(r.List) == 0 {
+		return nil, errhandle.FormatError(errhandle.ErrEmptyList)
+	}
+	for i := range r.List {
+		if r.List[i].Flag == "##end" {
+			return r.List[i], nil
+		}
+	}
+	return nil, errhandle.FormatError(errhandle.ErrEndRoom)
+}
+
+func (r *Rooms) GetRoomByID(id int) (*Room, error) {
+	if len(r.List) == 0 {
+		return nil, errhandle.FormatError(errhandle.ErrEmptyList)
+	}
+	room, err := r.searchByID(id)
+	if err != nil {
+		return nil, err
+	}
+	if room == nil {
+		return nil, errhandle.FormatError(errhandle.ErrRoomNotFound)
+	}
+	return room, nil
 }
 
 type Room struct {
@@ -85,11 +123,4 @@ type Room struct {
 	Y     int
 	Flag  string // ##start, ##end, ##0
 	Links []*Room
-}
-
-func (r *Room) flagCheck() (string, error) {
-	if r.Flag != "" {
-		return r.Flag, nil
-	}
-	return "", errors.New("error: no flag available")
 }

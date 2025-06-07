@@ -1,14 +1,14 @@
 package farm
 
 import (
-	"log"
+	errhandle "lemin/pkg/errors"
 	"strconv"
 )
 
-func AntsNum(lines []string) int {
+func AntsNum(lines []string) (int, error) {
 	ants, err := strconv.Atoi(lines[0])
 	if err != nil || ants <= 0 {
-		log.Fatalf("ERROR: invalid number of ants")
+		return 0, errhandle.FormatError(errhandle.ErrInvalidAnts)
 	}
-	return ants
+	return ants, nil
 }

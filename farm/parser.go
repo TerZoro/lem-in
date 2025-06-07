@@ -1,7 +1,7 @@
 package farm
 
 import (
-	"lemin/model"
+	"lemin/internal/model"
 	"strconv"
 	"strings"
 )

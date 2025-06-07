@@ -1,12 +1,12 @@
-package main
+package pathfinding
 
 import (
-	"errors"
 	"fmt"
-	"lemin/model"
+	"lemin/internal/model"
+	errhandle "lemin/pkg/errors"
 )
 
-func Bfs(rooms *model.Rooms, numAnts int) (*model.Paths, error) {
+func PathStarter(rooms *model.Rooms, numAnts int) (*model.Paths, error) {
 	start, err1 := rooms.SearchStart()
 	end, err2 := rooms.SearchEnd()
 	if err1 != nil || err2 != nil {
@@ -23,7 +23,7 @@ func Bfs(rooms *model.Rooms, numAnts int) (*model.Paths, error) {
 	findAllPaths(start, end, visited, currentPath, paths)
 
 	if len(paths.AllPaths) == 0 {
-		return nil, errors.New("no paths found from start to end")
+		return nil, errhandle.FormatError(errhandle.ErrNoPaths)
 	}
 
 	// Sort paths by length for optimal distribution
