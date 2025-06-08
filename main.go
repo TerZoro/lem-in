@@ -2,6 +2,7 @@ package main
 
 import (
 	"lemin/farm"
+	"lemin/internal/drawing"
 	"lemin/internal/pathfinding"
 	"lemin/internal/simulation"
 	errhandle "lemin/pkg/errors"
@@ -37,4 +38,9 @@ func main() {
 
 	// Simulate ant movement
 	simulation.SimulateAnts(paths, ants, rooms, lines)
+
+	// Draw the graph visualization
+	if err := drawing.DrawGraph(rooms); err != nil {
+		log.Printf("Warning: Could not draw graph: %v", err)
+	}
 }

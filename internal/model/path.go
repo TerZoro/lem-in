@@ -8,7 +8,8 @@ type Path struct {
 }
 
 type Paths struct {
-	AllPaths []*Path
+	AllPaths            []*Path
+	OptimalDistribution []int // Stores how many ants should use each path
 }
 
 func NewPaths() *Paths {

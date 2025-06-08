@@ -19,7 +19,7 @@ func SimulateAnts(paths *model.Paths, numAnts int, rooms *model.Rooms, lines []s
 		}
 	}
 
-	// Distribute ants
+	// Distribute ants using optimal distribution
 	distributeAnts(ants, paths)
 
 	// Track which rooms are occupied (except start and end)
@@ -27,15 +27,15 @@ func SimulateAnts(paths *model.Paths, numAnts int, rooms *model.Rooms, lines []s
 
 	turn := 0
 	finishedAnts := 0
-	antStartTurn := make([]int, numAnts) // Track when each ant should start
+	antStartTurn := make([]int, numAnts)
 
-	// Calculate optimal start times for ants on same path
+	// Calculate start times: ants on same path start at different turns
 	for i := 0; i < numAnts; i++ {
-		antStartTurn[i] = 1 // Default start on turn 1
-		// If multiple ants use same path, delay them
+		antStartTurn[i] = 1
+		// Count how many ants on the same path have lower IDs (started before)
 		for j := 0; j < i; j++ {
-			if ants[i].PathIndex == ants[j].PathIndex {
-				antStartTurn[i] = antStartTurn[j] + 1
+			if ants[j].PathIndex == ants[i].PathIndex {
+				antStartTurn[i]++
 			}
 		}
 	}

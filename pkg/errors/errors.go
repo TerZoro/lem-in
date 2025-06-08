@@ -18,6 +18,7 @@ const (
 	ErrParseRooms   = "could not parse rooms"
 	ErrStartRoom    = "start room not found"
 	ErrEndRoom      = "end room not found"
+	ErrDrawGraph    = "no rooms to draw"
 )
 
 func FormatError(msg string, args ...interface{}) error {
