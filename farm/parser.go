@@ -3,12 +3,16 @@ package farm
 import (
 	"fmt"
 	"lemin/internal/model"
+	errhandle "lemin/pkg/errors"
 	"strconv"
 	"strings"
 )
 
 func ParseRooms(lines []string) (*model.Rooms, error) {
-	fmt.Println("Debug: Starting to parse rooms")
+	if len(lines) == 0 {
+		return nil, errhandle.FormatError(errhandle.ErrParseRooms)
+	}
+
 	rooms := &model.Rooms{}
 	for i := 1; i < len(lines); i++ {
 		line := strings.TrimSpace(lines[i])
@@ -22,14 +26,15 @@ func ParseRooms(lines []string) (*model.Rooms, error) {
 			err := parseLinks(rooms, lines[i:])
 			if err != nil {
 				fmt.Printf("Debug: Error parsing links: %v\n", err)
+				return nil, errhandle.FormatError(errhandle.ErrParseRooms)
 			}
-			return rooms, err
+			return rooms, nil
 		}
 
 		parts := strings.Fields(line)
 		if len(parts) != 3 {
 			fmt.Printf("Debug: Skipping invalid room line: %s\n", line)
-			continue
+			return nil, errhandle.FormatError(errhandle.ErrParseRooms)
 		}
 
 		// First part is now a string (room name)
@@ -38,7 +43,7 @@ func ParseRooms(lines []string) (*model.Rooms, error) {
 		y, err2 := strconv.Atoi(parts[2])
 		if err1 != nil || err2 != nil {
 			fmt.Printf("Debug: Invalid coordinates in line: %s\n", line)
-			continue
+			return nil, errhandle.FormatError(errhandle.ErrParseRooms)
 		}
 
 		flag := "##0"

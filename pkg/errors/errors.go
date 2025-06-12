@@ -15,14 +15,14 @@ const (
 	ErrInvalidAnts  = "invalid number of ants"
 	ErrEmptyList    = "list is empty"
 	ErrRoomNotFound = "room not found"
-	ErrParseRooms   = "could not parse rooms"
+	ErrParseRooms   = "invalid data format"
 	ErrStartRoom    = "start room not found"
 	ErrEndRoom      = "end room not found"
 	ErrDrawGraph    = "no rooms to draw"
 )
 
 func FormatError(msg string, args ...interface{}) error {
-	return fmt.Errorf("ERROR: "+msg, args...)
+	return fmt.Errorf(msg, args...)
 }
 
 func HandleError(err error) {

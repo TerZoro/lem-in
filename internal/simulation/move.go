@@ -27,12 +27,16 @@ func SimulateAnts(paths *model.Paths, numAnts int, rooms *model.Rooms, lines []s
 
 	// Calculate start times based on optimal distribution
 	antStartTurn := make([]int, numAnts)
-	pathAntCount := make(map[int]int) // Count of ants on each path
 
-	for i := 0; i < numAnts; i++ {
-		pathIndex := ants[i].PathIndex
-		pathAntCount[pathIndex]++
-		antStartTurn[i] = pathAntCount[pathIndex]
+	// Assign start turns based on path order and distribution
+	nextID := 1
+	for i := range paths.AllPaths {
+		for j := 0; j < paths.OptimalDistribution[i]; j++ {
+			if nextID <= numAnts {
+				antStartTurn[nextID-1] = j + 1
+				nextID++
+			}
+		}
 	}
 
 	// Print the original input first (as required by the task)

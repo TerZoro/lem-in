@@ -46,74 +46,39 @@ func PathStarter(rooms *model.Rooms, numAnts int) (*model.Paths, error) {
 	// Calculate optimal distribution
 	distribution := make([]int, len(pathStrings))
 
-	// Calculate the optimal number of ants per path
-	// We want to maximize parallel movement while minimizing total time
-	totalLength := 0
-	for _, path := range pathsResult.AllPaths {
-		totalLength += path.Length
-	}
-
-	// Calculate the base distribution
-	// Distribute ants to maximize parallel movement
-	remainingAnts := numAnts
-
-	// First, calculate how many ants each path should get based on its length
-	// and the total number of paths
-	baseAnts := numAnts / len(pathStrings)
-
-	// Distribute base ants
-	for i := range distribution {
-		distribution[i] = baseAnts
-		remainingAnts -= baseAnts
-	}
-
-	// Distribute extra ants to maintain staggered movement
-	for remainingAnts > 0 {
-		// Find the path that will minimize the total time
-		bestPath := 0
-		bestTime := (distribution[0] + 1) * pathsResult.AllPaths[0].Length
-		for i := 1; i < len(distribution); i++ {
-			time := (distribution[i] + 1) * pathsResult.AllPaths[i].Length
-			if time < bestTime {
-				bestTime = time
-				bestPath = i
+	// Find the minimal T that satisfies the constraint
+	T := 1
+	for {
+		totalAnts := 0
+		for _, path := range pathsResult.AllPaths {
+			antsForPath := T - path.Length + 1
+			if antsForPath > 0 {
+				totalAnts += antsForPath
 			}
 		}
-		distribution[bestPath]++
-		remainingAnts--
+		if totalAnts >= numAnts {
+			break
+		}
+		T++
 	}
 
-	// Ensure the distribution maintains staggered movement
-	// by adjusting the distribution to minimize waiting time
-	for i := 1; i < len(distribution); i++ {
-		// Calculate the time difference between adjacent paths
-		timeDiff := (distribution[i] * pathsResult.AllPaths[i].Length) -
-			(distribution[i-1] * pathsResult.AllPaths[i-1].Length)
-
-		// If the time difference is too large, move some ants
-		if timeDiff > pathsResult.AllPaths[i].Length {
-			move := timeDiff / (2 * pathsResult.AllPaths[i].Length)
-			if move > 0 {
-				distribution[i] -= move
-				distribution[i-1] += move
-			}
+	// Calculate A[i] for each path
+	for i, path := range pathsResult.AllPaths {
+		antsForPath := T - path.Length + 1
+		if antsForPath > 0 {
+			distribution[i] = antsForPath
 		}
 	}
 
-	// Ensure each path has at least one ant
-	for i := range distribution {
-		if distribution[i] == 0 {
-			// Find the path with the most ants
-			maxPath := 0
-			for j := 1; j < len(distribution); j++ {
-				if distribution[j] > distribution[maxPath] {
-					maxPath = j
-				}
-			}
-			// Move one ant from the path with the most ants
-			distribution[maxPath]--
-			distribution[i]++
-		}
+	// Adjust distribution to match exactly numAnts
+	totalDistributed := 0
+	for _, ants := range distribution {
+		totalDistributed += ants
+	}
+	if totalDistributed > numAnts {
+		// Remove excess ants from the longest path
+		excess := totalDistributed - numAnts
+		distribution[len(distribution)-1] -= excess
 	}
 
 	pathsResult.OptimalDistribution = distribution
