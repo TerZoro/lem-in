@@ -13,7 +13,7 @@ func (rms *Rooms) AddRoom(room *Room) {
 	rms.List = append(rms.List, room)
 }
 
-func (rms *Rooms) searchByID(id int) (*Room, error) {
+func (rms *Rooms) searchByID(id string) (*Room, error) {
 	if len(rms.List) < 1 {
 		return nil, errhandle.FormatError(errhandle.ErrEmptyList)
 	}
@@ -49,7 +49,7 @@ func (rms *Rooms) SearchEnd() (*Room, error) {
 	return nil, errhandle.FormatError(errhandle.ErrEndRoom)
 }
 
-func (rms *Rooms) AddLink(fromID, toID int) error {
+func (rms *Rooms) AddLink(fromID, toID string) error {
 	from, err := rms.searchByID(fromID)
 	if err != nil {
 		return err
@@ -66,11 +66,11 @@ func (rms *Rooms) AddLink(fromID, toID int) error {
 func (rms *Rooms) Printer() {
 	fmt.Println("Parsed rooms:")
 	for _, r := range rms.List {
-		fmt.Printf("Room: %d (%d, %d)\n", r.ID, r.X, r.Y)
+		fmt.Printf("Room: %s (%d, %d)\n", r.ID, r.X, r.Y)
 	}
 }
 
-func (rms *Rooms) Search(id int) (*Room, error) {
+func (rms *Rooms) Search(id string) (*Room, error) {
 	for i := range rms.List {
 		if rms.List[i].ID == id {
 			return rms.List[i], nil
@@ -103,7 +103,7 @@ func (r *Rooms) GetEndRoom() (*Room, error) {
 	return nil, errhandle.FormatError(errhandle.ErrEndRoom)
 }
 
-func (r *Rooms) GetRoomByID(id int) (*Room, error) {
+func (r *Rooms) GetRoomByID(id string) (*Room, error) {
 	if len(r.List) == 0 {
 		return nil, errhandle.FormatError(errhandle.ErrEmptyList)
 	}
@@ -118,7 +118,7 @@ func (r *Rooms) GetRoomByID(id int) (*Room, error) {
 }
 
 type Room struct {
-	ID    int
+	ID    string
 	X     int
 	Y     int
 	Flag  string // ##start, ##end, ##0

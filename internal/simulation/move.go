@@ -13,7 +13,7 @@ func SimulateAnts(paths *model.Paths, numAnts int, rooms *model.Rooms, lines []s
 			ID:        i + 1,
 			PathIndex: -1, // Will be assigned based on optimal distribution
 			StepIndex: 0,  // Start at the start room
-			RoomID:    -1, // Will be set when path is assigned
+			RoomID:    "", // Will be set when path is assigned
 			Active:    false,
 			Finished:  false,
 		}
@@ -23,27 +23,25 @@ func SimulateAnts(paths *model.Paths, numAnts int, rooms *model.Rooms, lines []s
 	distributeAnts(ants, paths)
 
 	// Track which rooms are occupied (except start and end)
-	occupied := make(map[int]bool)
+	occupied := make(map[string]bool)
 
-	turn := 0
-	finishedAnts := 0
+	// Calculate start times based on optimal distribution
 	antStartTurn := make([]int, numAnts)
+	pathAntCount := make(map[int]int) // Count of ants on each path
 
-	// Calculate start times: ants on same path start at different turns
 	for i := 0; i < numAnts; i++ {
-		antStartTurn[i] = 1
-		// Count how many ants on the same path have lower IDs (started before)
-		for j := 0; j < i; j++ {
-			if ants[j].PathIndex == ants[i].PathIndex {
-				antStartTurn[i]++
-			}
-		}
+		pathIndex := ants[i].PathIndex
+		pathAntCount[pathIndex]++
+		antStartTurn[i] = pathAntCount[pathIndex]
 	}
 
 	// Print the original input first (as required by the task)
 	printOriginalInput(lines)
 
 	// Simulate movement
+	turn := 0
+	finishedAnts := 0
+
 	for finishedAnts < numAnts {
 		turn++
 		moves := []string{}
@@ -80,7 +78,7 @@ func SimulateAnts(paths *model.Paths, numAnts int, rooms *model.Rooms, lines []s
 					if nextRoom.Flag != "##start" && nextRoom.Flag != "##end" {
 						occupied[nextRoom.ID] = true
 					}
-					moves = append(moves, fmt.Sprintf("L%d-%d", ant.ID, nextRoom.ID))
+					moves = append(moves, fmt.Sprintf("L%d-%s", ant.ID, nextRoom.ID))
 
 					// Check if ant reached the end
 					if nextRoom.Flag == "##end" {

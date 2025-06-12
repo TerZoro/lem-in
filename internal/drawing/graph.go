@@ -48,7 +48,7 @@ func drawTunnels(grid [][]rune, rooms *model.Rooms, minX, minY int) {
 
 	for _, startRoom := range rooms.List {
 		for _, endRoom := range startRoom.Links {
-			key := fmt.Sprintf("%d-%d", minInt(startRoom.ID, endRoom.ID), maxInt(startRoom.ID, endRoom.ID))
+			key := fmt.Sprintf("%s-%s", minString(startRoom.ID, endRoom.ID), maxString(startRoom.ID, endRoom.ID))
 			if drawn[key] {
 				continue
 			}
@@ -146,7 +146,7 @@ func isPathClear(grid [][]rune, x1, y1, x2, y2 int, allRooms *model.Rooms, start
 				}
 				otherX := (otherRoom.X-minX)*scale + padding
 				otherY := (otherRoom.Y-minY)*scale + padding
-				labelWidth := len(fmt.Sprintf("[%d]", otherRoom.ID))
+				labelWidth := len(fmt.Sprintf("[%s]", otherRoom.ID))
 				if x >= otherX && x < otherX+labelWidth && y == otherY {
 					return false // Path is blocked by another room.
 				}
@@ -190,12 +190,12 @@ func drawLine(grid [][]rune, x1, y1, x2, y2 int) {
 
 // --- Display and Utility Functions ---
 
-// drawRooms places room labels like "[0]" on the grid.
+// drawRooms places room labels like "[room_name]" on the grid.
 func drawRooms(grid [][]rune, rooms *model.Rooms, minX, minY int) {
 	for _, room := range rooms.List {
 		x := (room.X-minX)*scale + padding
 		y := (room.Y-minY)*scale + padding
-		label := fmt.Sprintf("[%d]", room.ID)
+		label := fmt.Sprintf("[%s]", room.ID)
 		// Clear the area for the room label before drawing it.
 		for i := 0; i < len(label); i++ {
 			if y < len(grid) && x+i < len(grid[0]) {
@@ -243,14 +243,14 @@ func findBounds(rooms *model.Rooms) (minX, maxX, minY, maxY int) {
 	return minX, maxX, minY, maxY
 }
 
-func minInt(a, b int) int {
+func minString(a, b string) string {
 	if a < b {
 		return a
 	}
 	return b
 }
 
-func maxInt(a, b int) int {
+func maxString(a, b string) string {
 	if a > b {
 		return a
 	}
